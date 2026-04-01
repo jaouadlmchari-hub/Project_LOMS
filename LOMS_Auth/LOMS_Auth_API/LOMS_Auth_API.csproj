@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.1" />
+    <PackageReference Include="System.Security.Permissions" Version="11.0.0-preview.2.26159.112" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LOMS_Auth_Business\LOMS_Auth_Business.csproj" />
+    <ProjectReference Include="..\LOMS_Auth_DataAccess\LOMS_Auth_DataAccess.csproj" />
+    <ProjectReference Include="..\LOMS_Auth_Shared\LOMS_Auth_Shared.csproj" />
+  </ItemGroup>
+
+</Project>
