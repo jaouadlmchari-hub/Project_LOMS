@@ -11,6 +11,14 @@ namespace LOMS_Auth_API.Controllers
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
+
+        [HttpGet("{userID}/username")]
+        public async Task<ActionResult<string>> GetUserName(int userID)
+        {
+            var user = await clsUser.FindByUserIDAsync(userID); 
+            if (user == null) return NotFound();
+            return Ok(user.DTO.UserName);
+        }
         // 1. GET: api/users (Liste complète fusionnée SQL + API Employee)
         [HttpGet]
         public async Task<ActionResult<List<Dictionary<string, object>>>> GetAllUsers()
@@ -105,12 +113,14 @@ namespace LOMS_Auth_API.Controllers
         {
             return Ok(clsUser.IsUserExist(username));
         }
+
+
     }
 
     // DTO simple pour la réception des données de connexion
     public class LoginRequest
     {
-        public string UserName { get; set; }
-        public string Password { get; set; }
+        public string? UserName { get; set; }
+        public string? Password { get; set; }
     }
 }

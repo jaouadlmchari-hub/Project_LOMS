@@ -111,8 +111,8 @@ namespace LOMS_Auth_Business
 
                 if (emp != null)
                 {
-                    row["FullName"] = emp.firstName + " " + emp.lastName;
-                    row["Email"] = emp.email;
+                    row["FullName"] = emp.FirstName + " " + emp.LastName;
+                    row["Email"] = emp.Email;
                 }
                 else
                 {
@@ -127,19 +127,22 @@ namespace LOMS_Auth_Business
         {
             UserDTO dto = clsUserData.FindUserByUserID(UserID);
 
-            if (dto != null)
+            if (dto == null)
             {
-                // Récupérer les rôles locaux
-                dto.SelectedRolesIDs = clsUserRolesData.GetUserRolesIDs(dto.UserID);
+                // Si on entre ici, c'est que le problème est dans la DAL (SQL)
+                return null;
+            }
 
-                // Récupérer les infos externes via API
+            try
+            {
                 var empInfo = await clsEmployeeServiceClient.GetEmployeeBasicInfoAsync(dto.EmployeeID);
-
                 return new clsUser(dto, empInfo);
             }
-            return null;
+            catch (Exception ex)
+            {
+                throw ex; // remonte l'erreur vers Swagger
+            }
         }
-
         public static async Task<clsUser> FindByUserNameAndPasswordAsync(string UserName, string Password)
         {
             UserDTO dto = clsUserData.FindUserByUserNameAndPassword(UserName, Password);

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,15 +38,15 @@ namespace LOMS_Auth_DataAccess
 
             using(SqlConnection  connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
             {
-                string query = @"Insert Into Users(UserName ,PasswordHash, EmployeeID ,IsActive)
-                               Values(@UserName, @PasswordHash,@EmployeeID,@IsActive)
+                string query = @"Insert Into Users(Username ,Password, EmployeeID ,IsActive)
+                               Values(@Username, @Password,@EmployeeID,@IsActive)
                                SELECT SCOPE_IDENTITY();";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@EmployeeID", DTO.EmployeeID);
-                    command.Parameters.AddWithValue("@UserName", DTO.UserName);
-                    command.Parameters.AddWithValue("@PasswordHash", DTO.Password);
+                    command.Parameters.AddWithValue("@Username", DTO.UserName);
+                    command.Parameters.AddWithValue("@Password", DTO.Password);
                     command.Parameters.AddWithValue("@IsActive", DTO.IsActive);
 
                     try
@@ -331,8 +331,8 @@ namespace LOMS_Auth_DataAccess
                                 dto = new UserDTO
                                 {
                                     UserID = (int)reader["UserID"],
-                                    UserName = (string)reader["UserName"],
-                                    Password = (string)reader["PasswordHash"], 
+                                    UserName = (string)reader["Username"],
+                                    Password = (string)reader["Password"], 
                                     EmployeeID = (int)reader["EmployeeID"],
                                     IsActive = (bool)reader["IsActive"],
                                     CreatedAt = (DateTime)reader["CreatedAt"]
@@ -340,10 +340,11 @@ namespace LOMS_Auth_DataAccess
                             }
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         // يمكن تسجيل الخطأ هنا
-                        dto = null;
+                        Console.WriteLine("Erreur DAL : " + ex.Message);
+                        throw;
                     }
                 }
             }
