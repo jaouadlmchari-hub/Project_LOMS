@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # --- Service Employee ---
+  employee-service:
+    container_name: employee-container
+    build:
+      context: .
+      dockerfile: LOMS_Employee/Dockerfile
+    ports:
+      - "7175:8080"
+    networks:
+      - loms-network
+
+  # --- Service Auth ---
+  auth-service:
+    container_name: auth-container
+    build:
+      context: .
+      dockerfile: LOMS_Auth/Dockerfile
+    ports:
+      - "7176:8081"
+    environment:
+      # Connexion à ton SQL Server sur Windows
+      - ConnectionStrings__AuthDbConnection=Server=host.docker.internal;Database=AuthDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
+      # URL pour appeler l'autre conteneur en interne
+      - ExternalServices__EmployeeApiUrl=http://employee-container:8080
+    depends_on:
+      - employee-service
+    networks:
+      - loms-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+# --- Création automatique du réseau ---
+networks:
+  loms-network:
+    driver: bridge
