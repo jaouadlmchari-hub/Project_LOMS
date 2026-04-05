@@ -10,6 +10,19 @@ namespace LOMS_Employee_API.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
+
+        [HttpGet("{employeeID}/fullname")]
+        public async Task<ActionResult<string>> GetFullName(int employeeID)
+        {
+            var employee = await clsEmployee.FindAsync(employeeID);
+
+            if (employee == null)
+            {
+                return NotFound("Employee not found");
+            }
+
+            return Ok(employee.FullName);
+        }
         [HttpGet("{id}")]
         public async Task<ActionResult<EmployeeDTO>> GetEmployeeById(int id)
         {

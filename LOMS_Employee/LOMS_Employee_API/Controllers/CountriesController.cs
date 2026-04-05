@@ -16,8 +16,7 @@ namespace LOMS_Employee_API.Controllers
             DataTable dt = clsCountry.GetAllCountries();
 
             if (dt == null || dt.Rows.Count == 0)
-                return NotFound("Aucun pays trouvé.");
-
+                return Ok("Aucun pay trouver");
             return Ok(clsHelper.DataTableToList(dt));
         }
 

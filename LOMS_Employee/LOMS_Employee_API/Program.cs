@@ -19,20 +19,20 @@ namespace LOMS_Employee_API
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            // Supprime ou commente le "if" pour que Swagger soit TOUJOURS disponible
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "LOMS Employee API V1");
+                c.RoutePrefix = string.Empty; // Swagger s'ouvrira directement sur http://localhost:7175
+            });
 
-            app.UseHttpsRedirection();
+
+            // IMPORTANT : Commente cette ligne pour Docker
+            // app.UseHttpsRedirection(); 
 
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
         }
     }
