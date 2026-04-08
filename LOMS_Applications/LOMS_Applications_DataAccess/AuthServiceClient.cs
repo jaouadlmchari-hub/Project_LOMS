@@ -8,13 +8,14 @@ namespace LOMS_Applications_DataAccess
     {
         private static readonly HttpClient _httpClient = new HttpClient();
 
+        public static string baseUrl = Environment.GetEnvironmentVariable("AUTH_API_URL") ?? "http://auth-container:8081/";
         public AuthServiceClient()
         {
-            // On récupère l'URL du conteneur Auth (Port 8081 en interne Docker)
-            string baseUrl = Environment.GetEnvironmentVariable("AUTH_API_URL") ?? "http://auth-container:8080/";
+
             if (_httpClient.BaseAddress == null)
             {
-                _httpClient.BaseAddress = new Uri(baseUrl);
+                // On s'assure que l'URL finit par un '/' pour HttpClient
+                _httpClient.BaseAddress = new Uri(baseUrl.EndsWith("/") ? baseUrl : baseUrl + "/");
             }
         }
 

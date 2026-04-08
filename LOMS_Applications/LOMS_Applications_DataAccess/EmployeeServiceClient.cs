@@ -11,14 +11,14 @@ namespace LOMS_Applications_DataAccess
     {
         private static readonly HttpClient _httpClient = new HttpClient();
 
+        public static string BaseUrl { get; set; }
+
         public EmployeeServiceClient()
         {
-            // On change localhost par le nom du conteneur pour que ça marche dans Docker par défaut
-            string baseUrl = Environment.GetEnvironmentVariable("EMPLOYEE_API_URL") ?? "http://employee-container:8080/";
-
-            if (_httpClient.BaseAddress == null)
+            // On configure l'adresse de base une seule fois
+            if (_httpClient.BaseAddress == null && !string.IsNullOrEmpty(BaseUrl))
             {
-                _httpClient.BaseAddress = new Uri(baseUrl.EndsWith("/") ? baseUrl : baseUrl + "/");
+                _httpClient.BaseAddress = new Uri(BaseUrl.EndsWith("/") ? BaseUrl : BaseUrl + "/");
             }
         }
 

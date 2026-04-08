@@ -1,4 +1,6 @@
 
+using LOMS_Applications_DataAccess;
+
 namespace LOMS_Applications_API
 {
     public class Program
@@ -9,8 +11,13 @@ namespace LOMS_Applications_API
 
             var connectionString = builder.Configuration.GetConnectionString("ApplicationDbConnection");
             LOMS_Applications_DataAccess.clsDataAccessSettings.ConnectionString = connectionString;
+            // Ajoute "ExternalServices:" devant le nom de la clé
+            string employeeUrl = builder.Configuration["ExternalServices:EMPLOYEE_API_URL"] ?? "http://localhost:7175/";
+            string authUrl = builder.Configuration["ExternalServices:AUTH_API_URL"] ?? "http://localhost:7176/";
 
-
+            // Injection
+            EmployeeServiceClient.BaseUrl = employeeUrl;
+            AuthServiceClient.baseUrl = authUrl;
             // Add services to the container.
 
             builder.Services.AddControllers();
