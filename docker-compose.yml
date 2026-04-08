@@ -1,29 +1,63 @@
-version: '3.8'
-
 services:
-  # --- Service Employee ---
+  # --- Infrastructure Kafka ---
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper-container
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - loms-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka-container
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper-container:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-container:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - loms-network
+
+  # --- Service Employee (Port 7175) ---
   employee-service:
     container_name: employee-container
+    image: loms-employee-service
     build:
       context: .
       dockerfile: LOMS_Employee/Dockerfile
     ports:
       - "7175:8080"
+    environment:
+      - ConnectionStrings__EmployeeDbConnection=Server=host.docker.internal;Database=LOMS_EmployeeDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
     networks:
       - loms-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
-  # --- Service Auth ---
+  # --- Service Auth (Port 7176) ---
   auth-service:
     container_name: auth-container
+    image: loms-auth-service
     build:
       context: .
       dockerfile: LOMS_Auth/Dockerfile
     ports:
       - "7176:8081"
     environment:
-      # Connexion à ton SQL Server sur Windows
-      - ConnectionStrings__AuthDbConnection=Server=host.docker.internal;Database=AuthDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
-      # URL pour appeler l'autre conteneur en interne
+      - ConnectionStrings__AuthDbConnection=Server=host.docker.internal;Database=LOMS_AuthDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
       - ExternalServices__EmployeeApiUrl=http://employee-container:8080
     depends_on:
       - employee-service
@@ -32,7 +66,48 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-# --- Création automatique du réseau ---
+  # --- Service Applications (Port 7177) ---
+  applications-service:
+    container_name: applications-container
+    image: loms-applications-service
+    build:
+      context: .
+      dockerfile: LOMS_Applications/Dockerfile
+    ports:
+      - "7177:8082"
+    environment:
+      - ConnectionStrings__ApplicationDbConnection=Server=host.docker.internal;Database=LOMS_ApplicationDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
+      - EMPLOYEE_API_URL=http://employee-container:8080/
+      - AUTH_API_URL=http://auth-container:8081/
+      - Kafka__BootstrapServers=kafka-container:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - loms-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # --- Service Leave (Port 7178) ---
+  leave-service:
+    container_name: leave-container
+    image: loms-leave-service
+    build:
+      context: .
+      dockerfile: LOMS_Leave/Dockerfile
+    ports:
+      - "7178:8083"
+    environment:
+      - ConnectionStrings__LeaveApplicationDbConnection=Server=host.docker.internal;Database=LOMS_LeaveDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
+      - Kafka__BootstrapServers=kafka-container:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - loms-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 networks:
   loms-network:
     driver: bridge
