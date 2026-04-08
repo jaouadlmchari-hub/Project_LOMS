@@ -67,14 +67,38 @@ namespace LOMS_Applications_Buisness
             return clsApplicationData.UpdateApplication(this.DTO);
         }
 
-        public virtual bool Save()
+        public virtual async Task<bool> SaveAsync()
         {
             switch (Mode)
             {
                 case enMode.AddNew:
+                    // 1. Sauvegarde en Base de données (Synchrone pour l'instant)
                     if (_AddNewApplication())
                     {
                         Mode = enMode.Update;
+
+                        // 2. Préparation du message complet
+                        var eventData = new ApplicationCreatedEvent
+                        {
+                            ApplicationID = this.DTO.ApplicationID,
+                            EmployeeID = this.DTO.EmployeeID,
+                            ApplicationDate = this.DTO.ApplicationDate,
+                            Status = this.DTO.Status,
+                            ApplicationTypeID = this.DTO.ApplicationTypeID,
+                            CreatedByUserID = this.DTO.CreatedByUserID,
+                            Notes = this.DTO.Notes
+                        };
+
+                        // 3. ATTENTE de Kafka (Plus d'avertissement !)
+                        bool kafkaSent = await clsKafkaProducer.PublishApplicationCreatedAsync(eventData);
+
+                        if (!kafkaSent)
+                        {
+                            // Optionnel : Tu peux décider d'annuler ou de logger 
+                            // si Kafka ne répond pas.
+                            Console.WriteLine("Attention: Application sauvée en DB mais échec Kafka.");
+                        }
+
                         return true;
                     }
                     return false;
@@ -84,9 +108,6 @@ namespace LOMS_Applications_Buisness
             }
             return false;
         }
-
-        // --- Méthodes Statiques ---
-
         public static clsApplication Find(int ApplicationID)
         {
             ApplicationDTO dto = clsApplicationData.GetApplicationInfoByID(ApplicationID);
