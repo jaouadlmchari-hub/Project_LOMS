@@ -10,6 +10,14 @@ namespace LOMS_Auth_API
             var connectionString = builder.Configuration.GetConnectionString("AuthDbConnection");
             LOMS_Auth_DataAccess.clsDataAccessSettings.ConnectionString = connectionString;
 
+
+            var employeeUrl = builder.Configuration["ExternalServices:EmployeeApiUrl"];
+
+            if (!string.IsNullOrEmpty(employeeUrl))
+            {
+                // On envoie l'URL à la classe DataAccess
+                LOMS_Auth_DataAccess.LOMS_Auth_DataAccess.clsEmployeeServiceClient.BaseUrl = employeeUrl;
+            }
             // Add services to the container.
 
             builder.Services.AddControllers();
