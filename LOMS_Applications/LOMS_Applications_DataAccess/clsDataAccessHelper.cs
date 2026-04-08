@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LOMS_Employee_DataAccess
+namespace LOMS_Applications_DataAccess
 {
     public  class clsDataAccessHelper
     {
