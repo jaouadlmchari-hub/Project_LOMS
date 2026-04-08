@@ -12,7 +12,7 @@ namespace LOMS_Applications.Controllers
     [ApiController]
     public class ApplicationsController : ControllerBase
     {
-        // 1. Récupérer toutes les demandes (En utilisant clsHelper)
+        // 1. Récupérer toutes les demandes
         [HttpGet("all")]
         public ActionResult<List<Dictionary<string, object>>> GetAllApplications()
         {
@@ -21,13 +21,11 @@ namespace LOMS_Applications.Controllers
             if (dt == null || dt.Rows.Count == 0)
                 return NotFound(new { Message = "Aucune demande trouvée." });
 
-            // Utilisation de ta méthode centralisée dans la BLL
             var result = clsHelper.DataTableToList(dt);
-
             return Ok(result);
         }
 
-        // 2. Récupérer une demande spécifique avec les noms (Async)
+        // 2. Récupérer une demande spécifique (Détails complets)
         [HttpGet("{id}")]
         public async Task<ActionResult<dynamic>> GetApplicationById(int id)
         {
@@ -36,7 +34,6 @@ namespace LOMS_Applications.Controllers
             if (app == null)
                 return NotFound(new { Message = $"Demande ID {id} introuvable." });
 
-            // Appels asynchrones vers les autres microservices
             string employeeName = await app.GetEmployeeFullNameAsync();
             string actionByName = await app.GetActionByUserNameAsync();
 
@@ -48,9 +45,9 @@ namespace LOMS_Applications.Controllers
             });
         }
 
-        // 3. Ajouter une demande
+        // 3. (POST) - Maintenant ASYNC
         [HttpPost("add")]
-        public ActionResult AddApplication([FromBody] ApplicationDTO newAppDto)
+        public async Task<ActionResult> AddApplication([FromBody] ApplicationDTO newAppDto)
         {
             if (newAppDto == null) return BadRequest("Données invalides.");
 
@@ -61,19 +58,38 @@ namespace LOMS_Applications.Controllers
             app.DTO.ApplicationTypeID = newAppDto.ApplicationTypeID;
             app.DTO.CreatedByUserID = newAppDto.CreatedByUserID;
             app.DTO.Notes = newAppDto.Notes;
-            app.DTO.ApplicationDate = DateTime.Now;
-            app.DTO.Status = "Pending";
-            app.DTO.LastStatusDate = DateTime.Now;
 
-            if (app.Save())
+            // Utilisation de AWAIT ici pour ne pas bloquer le serveur
+            if (await app.SaveAsync())
             {
-                return CreatedAtAction(nameof(GetApplicationById), new { id = app.DTO.ApplicationID }, app.DTO);
+                return CreatedAtAction(nameof(GetApplicationById),
+                    new { id = app.DTO.ApplicationID }, app.DTO);
             }
 
-            return StatusCode(500, "Erreur lors de la sauvegarde.");
+            return StatusCode(500, "Erreur lors de la création ou de la notification.");
         }
 
-        // 4. Mettre à jour le statut (PATCH est plus adapté pour une modification partielle)
+        // 4. Mettre à jour une demande existante (PUT) 
+        [HttpPut("update/{id}")]
+        public async Task<ActionResult> UpdateApplication(int id, [FromBody] ApplicationDTO updateDto)
+        {
+            clsApplication app = clsApplication.Find(id);
+            if (app == null) return NotFound($"Demande {id} introuvable.");
+
+            // Mise à jour des champs autorisés
+            app.DTO.Notes = updateDto.Notes;
+            app.DTO.Status = updateDto.Status;
+            app.DTO.LastStatusDate = DateTime.Now;
+            app.DTO.ActionByUserID = updateDto.ActionByUserID;
+
+            if (await app.SaveAsync())
+            {
+                return Ok(new { Message = "Demande mise à jour.", Data = app.DTO });
+            }
+
+            return StatusCode(500, "Erreur lors de la mise à jour.");
+        }
+
         [HttpPatch("update-status/{id}")]
         public ActionResult UpdateStatus(int id, [FromQuery] short newStatus)
         {
@@ -84,7 +100,7 @@ namespace LOMS_Applications.Controllers
             return BadRequest("Échec de la mise à jour du statut.");
         }
 
-        // 5. Supprimer une demande
+        // 6. Supprimer une demande
         [HttpDelete("delete/{id}")]
         public ActionResult DeleteApplication(int id)
         {
