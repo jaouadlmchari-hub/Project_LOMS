@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36429.23 d17.14
+VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Leave_API", "LOMS_Leave_API.csproj", "{9EE727FC-0B07-4D4C-844A-6944B1A81CC7}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Leave_DataAccess", "..\LOMS_Leave_DataAccess\LOMS_Leave_DataAccess.csproj", "{EF5154EB-EDB3-43C7-99BD-C5A0CDEEC4CF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Leave_Shared", "..\LOMS_Leave_Shared\LOMS_Leave_Shared.csproj", "{59719559-BD81-4DD7-B701-BEBDA4849263}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Leave_Tests", "..\LOMS_Leave_Tests\LOMS_Leave_Tests.csproj", "{0965EF8B-63F9-487B-A793-D69465AE8EFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{59719559-BD81-4DD7-B701-BEBDA4849263}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{59719559-BD81-4DD7-B701-BEBDA4849263}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{59719559-BD81-4DD7-B701-BEBDA4849263}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0965EF8B-63F9-487B-A793-D69465AE8EFC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0965EF8B-63F9-487B-A793-D69465AE8EFC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0965EF8B-63F9-487B-A793-D69465AE8EFC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0965EF8B-63F9-487B-A793-D69465AE8EFC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
