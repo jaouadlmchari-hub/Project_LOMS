@@ -3,7 +3,7 @@ using FluentAssertions;
 using LOMS_Leave_Buisness;
 using LOMS_Leave_Shared;
 
-namespace LOMS_Leave_Tests
+namespace LOMS_Leave_Tests.Unit
 {
     public class LeaveTypeTests
     {
