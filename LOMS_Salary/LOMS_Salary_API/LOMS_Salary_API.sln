@@ -1,0 +1,43 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36429.23 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Salary_API", "LOMS_Salary_API.csproj", "{45D6F26C-4D2C-409A-B312-BA1EB869C399}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Salary_Buisness", "..\LOMS_Salary_Buisness\LOMS_Salary_Buisness.csproj", "{2FA8998A-5280-429B-A82F-E269B6CFB2FB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Salary_DataAccess", "..\LOMS_Salary_DataAccess\LOMS_Salary_DataAccess.csproj", "{BCA952AC-FAA7-4505-B326-E11BCC647AF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Salary_Shared", "..\LOMS_Salary_Shared\LOMS_Salary_Shared.csproj", "{F858F90D-7B5D-4767-8353-3EA8F9D2175C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{45D6F26C-4D2C-409A-B312-BA1EB869C399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45D6F26C-4D2C-409A-B312-BA1EB869C399}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45D6F26C-4D2C-409A-B312-BA1EB869C399}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45D6F26C-4D2C-409A-B312-BA1EB869C399}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FA8998A-5280-429B-A82F-E269B6CFB2FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FA8998A-5280-429B-A82F-E269B6CFB2FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FA8998A-5280-429B-A82F-E269B6CFB2FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FA8998A-5280-429B-A82F-E269B6CFB2FB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCA952AC-FAA7-4505-B326-E11BCC647AF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCA952AC-FAA7-4505-B326-E11BCC647AF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCA952AC-FAA7-4505-B326-E11BCC647AF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCA952AC-FAA7-4505-B326-E11BCC647AF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F858F90D-7B5D-4767-8353-3EA8F9D2175C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F858F90D-7B5D-4767-8353-3EA8F9D2175C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F858F90D-7B5D-4767-8353-3EA8F9D2175C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F858F90D-7B5D-4767-8353-3EA8F9D2175C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {527802C8-FA82-45EF-9A12-7E6A8A761B69}
+	EndGlobalSection
+EndGlobal

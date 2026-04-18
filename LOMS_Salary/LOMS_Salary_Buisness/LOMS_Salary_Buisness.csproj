@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+	  <LangVersion>latest</LangVersion>
+	  <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>LOMS_Salary_Buisness</RootNamespace>
+    <AssemblyName>LOMS_Salary_Buisness</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.0" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\LOMS_Salary_DataAccess\LOMS_Salary_DataAccess.csproj" />
+		<ProjectReference Include="..\LOMS_Salary_Shared\LOMS_Salary_Shared.csproj" />
+	</ItemGroup>
+
+</Project>

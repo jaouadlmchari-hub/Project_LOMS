@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+	  <LangVersion>latest</LangVersion>
+	  <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LOMS_Salary_Buisness\LOMS_Salary_Buisness.csproj" />
+    <ProjectReference Include="..\LOMS_Salary_DataAccess\LOMS_Salary_DataAccess.csproj" />
+    <ProjectReference Include="..\LOMS_Salary_Shared\LOMS_Salary_Shared.csproj" />
+  </ItemGroup>
+
+</Project>
