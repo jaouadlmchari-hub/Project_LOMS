@@ -1,4 +1,5 @@
-﻿using LOMS_Employee_DataAccess;
+﻿
+using LOMS_Employee_DataAccess;
 using LOMS_Employee_Shared;
 using System;
 using System.Collections.Generic;
@@ -48,11 +49,26 @@ namespace LOMS_Employee_Business
             switch (Mode)
             {
                 case enMode.AddNew:
-                    if (await _AddNewEmployeeAsync())
+                    // 1. On crée l'employé localement dans son propre service
+                    int insertedID = await clsEmployeeData.AddNewEmployeeAsync(this.DTO);
+
+                    if (insertedID != -1)
                     {
+                        this.DTO.EmployeeID = insertedID;
                         this.Mode = enMode.Update;
-                        // Appel asynchrone au service Leave
+
+                        // 2. Orchestration Microservices (Appels asynchrones)
+
+                        // Appel au service Salaire (Via API)
+                        _ = clsSalaryServiceClient.CreateInitialSalaryAsync(
+                                this.DTO.EmployeeID,
+                                this.DTO.Salary,
+                                this.DTO.CreatedByUserID
+                            );
+
+                        // Appel au service Leave (Via Kafka ou API selon ton choix)
                         _ = RequestLeaveInitializationAsync(this.DTO.EmployeeID);
+
                         return true;
                     }
                     return false;
@@ -62,7 +78,6 @@ namespace LOMS_Employee_Business
             }
             return false;
         }
-
         private async Task<bool> RequestLeaveInitializationAsync(int employeeId)
         {
             using (var client = new System.Net.Http.HttpClient())
