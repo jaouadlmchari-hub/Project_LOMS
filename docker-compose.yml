@@ -108,6 +108,22 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+   # --- Service Salaries (Port 7179) ---
+  salary-service:
+    container_name: salaries-container
+    image: loms-salaries-service
+    build:
+      context: .
+      dockerfile: LOMS_Salary/Dockerfile
+    ports:
+      - "7179:8084"
+    environment:
+      - ConnectionStrings__EmployeeSalaryDbConnection=Server=host.docker.internal;Database=LOMS_SalaryDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
+    networks:
+      - loms-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 networks:
   loms-network:
     driver: bridge
