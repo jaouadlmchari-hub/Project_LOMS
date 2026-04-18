@@ -49,25 +49,19 @@ namespace LOMS_Employee_Business
             switch (Mode)
             {
                 case enMode.AddNew:
-                    // 1. On crée l'employé localement dans son propre service
-                    int insertedID = await clsEmployeeData.AddNewEmployeeAsync(this.DTO);
-
-                    if (insertedID != -1)
+                    if (await _AddNewEmployeeAsync())
                     {
-                        this.DTO.EmployeeID = insertedID;
                         this.Mode = enMode.Update;
 
-                        // 2. Orchestration Microservices (Appels asynchrones)
-
-                        // Appel au service Salaire (Via API)
+                        // 1. Initialisation du Salaire (API Salary)
                         _ = clsSalaryServiceClient.CreateInitialSalaryAsync(
-                                this.DTO.EmployeeID,
-                                this.DTO.Salary,
-                                this.DTO.CreatedByUserID
-                            );
+                            this.DTO.EmployeeID,
+                            this.DTO.Salary,
+                            this.DTO.CreatedByUserID
+                        );
 
-                        // Appel au service Leave (Via Kafka ou API selon ton choix)
-                        _ = RequestLeaveInitializationAsync(this.DTO.EmployeeID);
+                        // 2. Initialisation des Congés (API Leave)
+                        _ = clsLeaveServiceClient.InitLeaveBalanceAsync(this.DTO.EmployeeID);
 
                         return true;
                     }
@@ -78,19 +72,6 @@ namespace LOMS_Employee_Business
             }
             return false;
         }
-        private async Task<bool> RequestLeaveInitializationAsync(int employeeId)
-        {
-            using (var client = new System.Net.Http.HttpClient())
-            {
-                string url = $"https://localhost:7001/api/LeaveBalances/init/{employeeId}";
-                try
-                {
-                    var response = await client.PostAsync(url, null);
-                    return response.IsSuccessStatusCode;
-                }
-                catch { return false; }
-            }
-        }
 
         #region Méthodes Statiques
 
@@ -100,7 +81,7 @@ namespace LOMS_Employee_Business
 
             if (dto != null)
             {
-                // Utilisation de client Salary asynchrone (Port 7200)
+                // Utilisation de client Salary asynchrone (Port 7179)
                 dto.Salary = await clsSalaryServiceClient.GetSalaryByEmployeeIDAsync(employeeID);
                 return new clsEmployee(dto);
             }
