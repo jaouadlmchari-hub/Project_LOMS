@@ -19,7 +19,10 @@ namespace LOMS_Employee_API
 
             var app = builder.Build();
 
-            // Supprime ou commente le "if" pour que Swagger soit TOUJOURS disponible
+            // Après builder.Build()
+            var salaryServiceUrl = builder.Configuration["Microservices:SalaryServiceUrl"];
+            clsSalaryServiceClient.Initialize(salaryServiceUrl);
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
