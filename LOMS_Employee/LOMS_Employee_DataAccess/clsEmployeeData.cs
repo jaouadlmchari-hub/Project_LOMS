@@ -57,7 +57,7 @@ namespace LOMS_Employee_DataAccess
                                 DepartmentID = reader["DepartmentID"] == DBNull.Value ? 0 : (int)reader["DepartmentID"],
                                 JobTitleID = reader["JobTitleID"] == DBNull.Value ? 0 : (int)reader["JobTitleID"],
 
-                                Salary = 0 // Le salaire sera récupéré plus tard via l'API (Port 7200)
+                                Salary = 0 // Le salaire sera récupéré plus tard via l'API (Port 7179)
                             };
                         }
                     }
@@ -111,7 +111,7 @@ namespace LOMS_Employee_DataAccess
                                 DepartmentID = reader["DepartmentID"] == DBNull.Value ? 0 : (int)reader["DepartmentID"],
                                 JobTitleID = reader["JobTitleID"] == DBNull.Value ? 0 : (int)reader["JobTitleID"],
 
-                                Salary = 0 // Le salaire sera récupéré plus tard via l'API (Port 7200)
+                                Salary = 0 // Le salaire sera récupéré plus tard via l'API (Port 7179)
                             };
                         }
                     }
@@ -176,37 +176,19 @@ namespace LOMS_Employee_DataAccess
 
             using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
             {
+                // La requête ne touche plus qu'à la table Employees
                 string query = @"
-            BEGIN TRY
-                BEGIN TRANSACTION;
-
-                INSERT INTO Employees 
-                (NationalNo, FirstName, SecondName, ThirdName, LastName, 
-                 DateOfBirth, Gender, Address, Phone, Email, 
-                 NationalityCountryID, ImagePath, HireDate, IsActive, 
-                 CreatedAt, DepartmentID, JobTitleID)
-                VALUES 
-                (@NationalNo, @FirstName, @SecondName, @ThirdName, @LastName, 
-                 @DateOfBirth, @Gender, @Address, @Phone, @Email, 
-                 @NationalityCountryID, @ImagePath, @HireDate, @IsActive, 
-                 @CreatedAt, @DepartmentID, @JobTitleID);
-
-                DECLARE @InsertedEmployeeID INT = SCOPE_IDENTITY();
-
-                INSERT INTO EmployeeSalaries
-                (EmployeeID, Salary, EffectiveDate, CreatedByUserID, CreatedAt)
-                VALUES
-                (@InsertedEmployeeID, @SalaryAmount, @EffectiveDate, @CreatedByUserID, @CreatedAt);
-
-                COMMIT TRANSACTION;
-
-                SELECT @InsertedEmployeeID;
-
-            END TRY
-            BEGIN CATCH
-                IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-                THROW;
-            END CATCH";
+            INSERT INTO Employees 
+            (NationalNo, FirstName, SecondName, ThirdName, LastName, 
+             DateOfBirth, Gender, Address, Phone, Email, 
+             NationalityCountryID, ImagePath, HireDate, IsActive, 
+             CreatedAt, DepartmentID, JobTitleID)
+            VALUES 
+            (@NationalNo, @FirstName, @SecondName, @ThirdName, @LastName, 
+             @DateOfBirth, @Gender, @Address, @Phone, @Email, 
+             @NationalityCountryID, @ImagePath, @HireDate, @IsActive, 
+             @CreatedAt, @DepartmentID, @JobTitleID);
+            SELECT SCOPE_IDENTITY();";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -228,9 +210,6 @@ namespace LOMS_Employee_DataAccess
                     command.Parameters.AddWithValue("@DepartmentID", employee.DepartmentID);
                     command.Parameters.AddWithValue("@JobTitleID", employee.JobTitleID);
 
-                    command.Parameters.AddWithValue("@SalaryAmount", employee.Salary);
-                    command.Parameters.AddWithValue("@EffectiveDate", employee.HireDate);
-                    command.Parameters.AddWithValue("@CreatedByUserID", employee.CreatedByUserID);
 
                     try
                     {
@@ -242,14 +221,16 @@ namespace LOMS_Employee_DataAccess
                             newID = insertedID;
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
+                        // Loguer l'erreur ici si nécessaire
                         throw;
                     }
                 }
             }
             return newID;
         }
+
 
         public static bool UpdateEmployee(EmployeeDTO employee)
         {
