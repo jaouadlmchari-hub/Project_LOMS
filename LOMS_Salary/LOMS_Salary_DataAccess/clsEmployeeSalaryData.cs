@@ -82,5 +82,36 @@ namespace LOMS_Salary_DataAccess
             catch (Exception) { /* Log error */ }
             return salaryDTO;
         }
+
+        public static int AddNewSalary(int employeeId, decimal salary, int createdBy)
+        {
+            int newID = -1;
+            using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
+            {
+                string query = @"INSERT INTO EmployeeSalaries 
+                        (EmployeeID, Salary, EffectiveDate, CreatedByUserID, CreatedAt)
+                        VALUES (@EmployeeID, @Salary, @EffectiveDate, @CreatedBy, @CreatedAt);
+                        SELECT SCOPE_IDENTITY();";
+
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@EmployeeID", employeeId);
+                    command.Parameters.AddWithValue("@Salary", salary);
+                    command.Parameters.AddWithValue("@EffectiveDate", DateTime.Now);
+                    command.Parameters.AddWithValue("@CreatedBy", createdBy);
+                    command.Parameters.AddWithValue("@CreatedAt", DateTime.Now);
+
+                    try
+                    {
+                        connection.Open();
+                        object result = command.ExecuteScalar();
+                        if (result != null && int.TryParse(result.ToString(), out int id))
+                            newID = id;
+                    }
+                    catch { throw; }
+                }
+            }
+            return newID;
+        }
     }
 }

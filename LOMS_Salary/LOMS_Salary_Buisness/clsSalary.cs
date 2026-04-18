@@ -37,5 +37,13 @@ namespace LOMS_Salary_Buisness
             else
                 return null;
         }
+
+        public static int AddNewSalary(int employeeId, decimal salary, int createdBy)
+        {
+            // Exp: On refuse les salaires inférieurs au SMIG ou négatifs
+            if (salary < 0) return -1;
+
+            return clsEmployeeSalaryData.AddNewSalary(employeeId, salary, createdBy);
+        }
     }
 }
