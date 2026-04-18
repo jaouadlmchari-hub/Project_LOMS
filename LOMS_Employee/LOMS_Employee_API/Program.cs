@@ -20,8 +20,12 @@ namespace LOMS_Employee_API
             var app = builder.Build();
 
             // Après builder.Build()
-            var salaryServiceUrl = builder.Configuration["Microservices:SalaryServiceUrl"];
-            clsSalaryServiceClient.Initialize(salaryServiceUrl);
+            var salaryUrl = builder.Configuration["Microservices:SalaryServiceUrl"];
+            var leaveUrl = builder.Configuration["Microservices:LeaveServiceUrl"];
+
+            // Initialisation des clients statiques
+            clsSalaryServiceClient.Initialize(salaryUrl);
+            clsLeaveServiceClient.Initialize(leaveUrl);
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>
