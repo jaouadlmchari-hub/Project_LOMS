@@ -35,5 +35,14 @@ namespace LOMS_Salary_API.Controllers
 
             return Ok(salary.DTO);
         }
+
+        [HttpPost("add")]
+        public IActionResult AddSalary([FromBody] EmployeeSalaryDTO request)
+        {
+            int newId = clsSalary.AddNewSalary(request.EmployeeID, request.Salary, request.CreatedByUserID);
+
+            if (newId != -1) return Ok(new { SalaryID = newId });
+            return BadRequest("Impossible de créer le salaire.");
+        }
     }
 }

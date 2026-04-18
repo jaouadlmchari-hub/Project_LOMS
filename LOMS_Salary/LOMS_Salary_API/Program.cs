@@ -7,6 +7,9 @@ namespace LOMS_Salary_API
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            var connectionString = builder.Configuration.GetConnectionString("EmployeeSalaryDbConnection");
+            LOMS_Salary_DataAccess.clsDataAccessSettings.ConnectionString = connectionString;
+
             // Add services to the container.
 
             builder.Services.AddControllers();
@@ -16,20 +19,20 @@ namespace LOMS_Salary_API
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
 
-            app.UseHttpsRedirection();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "LOMS Employee Salaries API V1");
+                c.RoutePrefix = string.Empty; // Swagger s'ouvrira directement sur http://localhost:7175
+            });
+
+
+            // IMPORTANT : Commente cette ligne pour Docker
+            // app.UseHttpsRedirection(); 
 
             app.UseAuthorization();
-
-
             app.MapControllers();
-
             app.Run();
         }
     }
