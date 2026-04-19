@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36429.23 d17.14
+VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Salary_API", "LOMS_Salary_API.csproj", "{45D6F26C-4D2C-409A-B312-BA1EB869C399}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Salary_DataAccess", "..\LOMS_Salary_DataAccess\LOMS_Salary_DataAccess.csproj", "{BCA952AC-FAA7-4505-B326-E11BCC647AF1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Salary_Shared", "..\LOMS_Salary_Shared\LOMS_Salary_Shared.csproj", "{F858F90D-7B5D-4767-8353-3EA8F9D2175C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Salary_Tests", "..\LOMS_Salary_Tests\LOMS_Salary_Tests.csproj", "{94927BE8-126A-4617-B42D-D9187299928D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{F858F90D-7B5D-4767-8353-3EA8F9D2175C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F858F90D-7B5D-4767-8353-3EA8F9D2175C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F858F90D-7B5D-4767-8353-3EA8F9D2175C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94927BE8-126A-4617-B42D-D9187299928D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94927BE8-126A-4617-B42D-D9187299928D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94927BE8-126A-4617-B42D-D9187299928D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94927BE8-126A-4617-B42D-D9187299928D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

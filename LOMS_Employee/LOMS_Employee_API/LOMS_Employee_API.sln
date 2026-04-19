@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Employee_Business", ".
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Employee_Shared", "..\LOMS_Employee_Shared\LOMS_Employee_Shared.csproj", "{E2E88A43-F812-483C-A5B9-F682E728C54A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Employee_Tests", "..\LOMS_Employee_Tests\LOMS_Employee_Tests.csproj", "{6742C9A5-296E-414F-AC1D-CE97FA6BCA67}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{E2E88A43-F812-483C-A5B9-F682E728C54A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2E88A43-F812-483C-A5B9-F682E728C54A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2E88A43-F812-483C-A5B9-F682E728C54A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6742C9A5-296E-414F-AC1D-CE97FA6BCA67}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6742C9A5-296E-414F-AC1D-CE97FA6BCA67}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6742C9A5-296E-414F-AC1D-CE97FA6BCA67}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6742C9A5-296E-414F-AC1D-CE97FA6BCA67}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

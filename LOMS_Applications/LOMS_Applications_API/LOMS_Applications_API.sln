@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Applications_Shared", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Applications_Buisness", "..\LOMS_Applications_Buisness\LOMS_Applications_Buisness.csproj", "{AD2EE1FD-98BB-49C0-B79E-08DF671B725A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Applications_Tests", "..\LOMS_Applications_Tests\LOMS_Applications_Tests.csproj", "{9309F6F6-4280-4BEE-A12C-F556A1BF0DAF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{AD2EE1FD-98BB-49C0-B79E-08DF671B725A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD2EE1FD-98BB-49C0-B79E-08DF671B725A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD2EE1FD-98BB-49C0-B79E-08DF671B725A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9309F6F6-4280-4BEE-A12C-F556A1BF0DAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9309F6F6-4280-4BEE-A12C-F556A1BF0DAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9309F6F6-4280-4BEE-A12C-F556A1BF0DAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9309F6F6-4280-4BEE-A12C-F556A1BF0DAF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
