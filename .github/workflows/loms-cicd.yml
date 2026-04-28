@@ -15,9 +15,22 @@ permissions:
   contents: read
 
 jobs:
-  # --- JOB 1 : BUILD  ---
-  build:
+
+  # -------------------------
+  # CI : BUILD + TEST GLOBAL
+  # -------------------------
+  build-and-test:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          - LOMS_Employee
+          - LOMS_Auth
+          - LOMS_Applications
+          - LOMS_Leave
+          - LOMS_Salary
+
     steps:
       - uses: actions/checkout@v4
 
@@ -28,58 +41,35 @@ jobs:
           cache: true
           cache-dependency-path: '**/*.csproj'
 
-      - name: Restore & Build
-        run: |
-          dotnet restore **/Project_LOMS.sln
-          dotnet build **/Project_LOMS.sln --configuration Release --no-restore
+      - name: Restore
+        run: dotnet restore ${{ matrix.service }}/${{ matrix.service }}.sln
 
-      - name: Upload Binaries
-        uses: actions/upload-artifact@v4
-        with:
-          name: loms-binaries
-          path: |
-            **/bin/Release/net8.0/
-            **/publish/
-          retention-days: 1
+      - name: Build
+        run: dotnet build ${{ matrix.service }}/${{ matrix.service }}.sln --configuration Release --no-restore
 
-  # --- JOB 2 : TESTS (Parallélisés par service) ---
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [Employee, Auth, Applications, Leave, Salary]
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+      - name: Run Tests
+        run: dotnet test ${{ matrix.service }}/${{ matrix.service }}.sln --configuration Release --no-build
 
-      - name: Download Binaries
-        uses: actions/download-artifact@v4
-        with:
-          name: loms-binaries
 
-      - name: Run Tests ${{ matrix.service }}
-        run: dotnet test LOMS_${{ matrix.service }}.Tests/LOMS_${{ matrix.service }}.Tests.csproj --configuration Release --no-build
-
-  # --- JOB 3 : DEPLOY (Build Docker & Push Parallélisés + Cache GHA) ---
+  # -------------------------
+  # CD : DOCKER DEPLOY
+  # -------------------------
   deploy:
-    needs: test
+    needs: build-and-test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
-        service: [Employee, Auth, Applications, Leave, Salary]
+        service:
+          - LOMS_Employee
+          - LOMS_Auth
+          - LOMS_Applications
+          - LOMS_Leave
+          - LOMS_Salary
+
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download Binaries
-        uses: actions/download-artifact@v4
-        with:
-          name: loms-binaries
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -91,9 +81,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: LOMS_${{ matrix.service }}/Dockerfile
+          file: ${{ matrix.service }}/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/loms-${{ matrix.service }}:latest
-          # --- LES CACHES SONT BIEN ICI (Appliqués à chaque itération de la matrix) ---
           cache-from: type=gha
           cache-to: type=gha,mode=max
