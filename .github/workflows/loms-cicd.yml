@@ -25,24 +25,22 @@ jobs:
 
       - name: Restore, Build & Test
         run: |
+          # 1. Localisation du projet API
           PROJ_FILE=$(find ./${{ matrix.service }} -name "*_API.csproj" | head -n 1)
-          
-          if [ -z "$PROJ_FILE" ]; then
-            echo "ERREUR : Aucun projet API trouvé dans ${{ matrix.service }}"
-            exit 1
-          fi
-          
-          echo "Processing Project: $PROJ_FILE"
+          echo "Building: $PROJ_FILE"
           dotnet restore "$PROJ_FILE"
           dotnet build "$PROJ_FILE" --configuration Release --no-restore
           
-          # On cherche le dossier de test (ex: ./LOMS_Employee.Tests ou ./LOMS_Employee_Tests)
-          TEST_FILE=$(find . -name "${{ matrix.service }}*Tests.csproj" | head -n 1 || echo "")
-          if [ -n "$TEST_FILE" ]; then
-            echo "Running tests: $TEST_FILE"
-            dotnet test "$TEST_FILE" --configuration Release --no-build
+          # 2. Localisation du projet de Test
+          # On cherche le .csproj, pas la dll
+          TEST_PROJECT=$(find . -name "${{ matrix.service }}*Tests.csproj" | head -n 1)
+          
+          if [ -n "$TEST_PROJECT" ]; then
+            echo "Testing project: $TEST_PROJECT"
+            # Utilisation d'un chemin simple sans fioritures
+            dotnet test "$TEST_PROJECT" --configuration Release --no-build --verbosity normal
           else
-            echo "Note: Aucun projet de test trouvé pour ${{ matrix.service }}, on continue."
+            echo "Aucun projet de test trouvé pour ${{ matrix.service }}"
           fi
 
   deploy:
