@@ -14,22 +14,14 @@ concurrency:
 permissions:
   contents: read
 
-jobs:
 
-  # -------------------------
-  # CI : BUILD + TEST GLOBAL
-  # -------------------------
+jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     strategy:
+      fail-fast: false
       matrix:
-        service:
-          - LOMS_Employee
-          - LOMS_Auth
-          - LOMS_Applications
-          - LOMS_Leave
-          - LOMS_Salary
+        service: [LOMS_Employee, LOMS_Auth, LOMS_Applications, LOMS_Leave, LOMS_Salary]
 
     steps:
       - uses: actions/checkout@v4
@@ -38,36 +30,23 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
-          cache: true
-          cache-dependency-path: '**/*.csproj'
 
-      - name: Restore
-        run: dotnet restore ${{ matrix.service }}/${{ matrix.service }}.sln
+      - name: Restore, Build & Test
+        # On ajoute "Project_LOMS/" devant le nom du service
+        run: |
+          SLN_FILE=$(find ./Project_LOMS/${{ matrix.service }} -name "*.sln" | head -n 1)
+          echo "Found Solution: $SLN_FILE"
+          dotnet restore "$SLN_FILE"
+          dotnet build "$SLN_FILE" --configuration Release --no-restore
+          dotnet test "$SLN_FILE" --configuration Release --no-build
 
-      - name: Build
-        run: dotnet build ${{ matrix.service }}/${{ matrix.service }}.sln --configuration Release --no-restore
-
-      - name: Run Tests
-        run: dotnet test ${{ matrix.service }}/${{ matrix.service }}.sln --configuration Release --no-build
-
-
-  # -------------------------
-  # CD : DOCKER DEPLOY
-  # -------------------------
   deploy:
     needs: build-and-test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
-        service:
-          - LOMS_Employee
-          - LOMS_Auth
-          - LOMS_Applications
-          - LOMS_Leave
-          - LOMS_Salary
-
+        service: [LOMS_Employee, LOMS_Auth, LOMS_Applications, LOMS_Leave, LOMS_Salary]
     steps:
       - uses: actions/checkout@v4
 
@@ -80,8 +59,9 @@ jobs:
       - name: Build & Push ${{ matrix.service }}
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ${{ matrix.service }}/Dockerfile
+          context: ./Project_LOMS/ # Le contexte doit être le dossier parent
+          # Chemin vers le Dockerfile spécifique
+          file: ./Project_LOMS/${{ matrix.service }}/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/loms-${{ matrix.service }}:latest
           cache-from: type=gha
