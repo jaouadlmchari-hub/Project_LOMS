@@ -30,8 +30,8 @@ jobs:
 
       - name: Restore & Build
         run: |
-          dotnet restore Project_LOMS.sln
-          dotnet build Project_LOMS.sln --configuration Release --no-restore
+          dotnet restore **/Project_LOMS.sln
+          dotnet build **/Project_LOMS.sln --configuration Release --no-restore
 
       - name: Upload Binaries
         uses: actions/upload-artifact@v4
