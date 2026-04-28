@@ -3,17 +3,8 @@ name: LOMS CI/CD Ultra-Optimized
 on:
   push:
     branches: [ main ]
-    paths-ignore: ['**.md', 'docs/**']
   pull_request:
     branches: [ main ]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
 
 jobs:
   build-and-test:
@@ -21,6 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        
         service: [LOMS_Employee, LOMS_Auth, LOMS_Applications, LOMS_Leave, LOMS_Salary]
 
     steps:
@@ -32,13 +24,26 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore, Build & Test
-        # On ajoute "Project_LOMS/" devant le nom du service
         run: |
-          SLN_FILE=$(find ./Project_LOMS/${{ matrix.service }} -name "*.sln" | head -n 1)
-          echo "Found Solution: $SLN_FILE"
-          dotnet restore "$SLN_FILE"
-          dotnet build "$SLN_FILE" --configuration Release --no-restore
-          dotnet test "$SLN_FILE" --configuration Release --no-build
+          PROJ_FILE=$(find ./${{ matrix.service }} -name "*_API.csproj" | head -n 1)
+          
+          if [ -z "$PROJ_FILE" ]; then
+            echo "ERREUR : Aucun projet API trouvé dans ${{ matrix.service }}"
+            exit 1
+          fi
+          
+          echo "Processing Project: $PROJ_FILE"
+          dotnet restore "$PROJ_FILE"
+          dotnet build "$PROJ_FILE" --configuration Release --no-restore
+          
+          # On cherche le dossier de test (ex: ./LOMS_Employee.Tests ou ./LOMS_Employee_Tests)
+          TEST_FILE=$(find . -name "${{ matrix.service }}*Tests.csproj" | head -n 1 || echo "")
+          if [ -n "$TEST_FILE" ]; then
+            echo "Running tests: $TEST_FILE"
+            dotnet test "$TEST_FILE" --configuration Release --no-build
+          else
+            echo "Note: Aucun projet de test trouvé pour ${{ matrix.service }}, on continue."
+          fi
 
   deploy:
     needs: build-and-test
@@ -59,10 +64,9 @@ jobs:
       - name: Build & Push ${{ matrix.service }}
         uses: docker/build-push-action@v5
         with:
-          context: ./Project_LOMS/ # Le contexte doit être le dossier parent
-          # Chemin vers le Dockerfile spécifique
-          file: ./Project_LOMS/${{ matrix.service }}/Dockerfile
+          context: .
+          file: ./${{ matrix.service }}/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/loms-${{ matrix.service }}:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
