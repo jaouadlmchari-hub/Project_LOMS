@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -21,60 +17,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-          # On s'assure explicitement que le cache est désactivé ici
-          cache: false 
+
 
       - name: Restore, Build & Test
         run: |
-          # 1. Localisation du projet API
+          # 1. Trouver le projet API
           PROJ_FILE=$(find ./${{ matrix.service }} -name "*_API.csproj" | head -n 1)
-          
-          if [ -z "$PROJ_FILE" ]; then
-            echo "ERREUR : Projet API non trouvé pour ${{ matrix.service }}"
-            exit 1
-          fi
-
           echo "Building: $PROJ_FILE"
+          
+          # On fait tout d'un coup pour éviter les conflits de dossiers
           dotnet restore "$PROJ_FILE"
-          dotnet build "$PROJ_FILE" --configuration Release --no-restore
+          dotnet build "$PROJ_FILE" -c Release --no-restore
           
-          # 2. Localisation du projet de Test
+          # 2. Trouver et lancer les tests
           TEST_PROJECT=$(find . -name "${{ matrix.service }}*Tests.csproj" | head -n 1)
-          
           if [ -n "$TEST_PROJECT" ]; then
-            echo "Testing project: $TEST_PROJECT"
-            dotnet test "$TEST_PROJECT" --configuration Release --no-build --verbosity normal
-          else
-            echo "Aucun projet de test trouvé pour ${{ matrix.service }}, skipping."
+            echo "Testing: $TEST_PROJECT"
+            # On retire --no-build pour être sûr que VSTest trouve tout
+            dotnet test "$TEST_PROJECT" -c Release
           fi
 
   deploy:
     needs: build-and-test
-    if: github.ref == 'refs/heads/main'
+    if: success() && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     strategy:
       matrix:
         service: [LOMS_Employee, LOMS_Auth, LOMS_Applications, LOMS_Leave, LOMS_Salary]
     steps:
       - uses: actions/checkout@v4
-
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build & Push ${{ matrix.service }}
+      - name: Build & Push
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./${{ matrix.service }}/Dockerfile
           push: true
-          # Conversion en minuscules pour Docker Hub (sécurité)
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
