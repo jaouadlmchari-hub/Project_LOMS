@@ -82,8 +82,10 @@ jobs:
       - name: Build & Push
         uses: docker/build-push-action@v5
         with:
-          context: ./${{ matrix.service }}
-          file: ./${{ matrix.service }}/Dockerfile
+          # On change le contexte pour la RACINE du projet (.)
+          context: . 
+          # Mais on pointe bien vers le Dockerfile du service spécifique
+          file: ./${{ matrix.service }}/Dockerfile 
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.service_name.outputs.lower }}:latest
           cache-from: type=gha
