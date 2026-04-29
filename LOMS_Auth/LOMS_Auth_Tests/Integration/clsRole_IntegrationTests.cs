@@ -21,14 +21,14 @@ namespace LOMS_Auth_Tests.Integration
         public void GetRoleNames_ShouldReturnList_WhenIDsAreProvided()
         {
             // Arrange
-            var roleIDs = new List<int> { 1 }; // Supposons que l'ID 1 existe (ex: Admin)
+            var roleIDs = new List<int> { 1 }; 
 
             // Act
             var names = clsRole.GetRoleNames(roleIDs);
 
             // Assert
             Assert.NotNull(names);
-            // Si la base est remplie, on peut vérifier que names.Count > 0
+            
         }
 
         [Fact]

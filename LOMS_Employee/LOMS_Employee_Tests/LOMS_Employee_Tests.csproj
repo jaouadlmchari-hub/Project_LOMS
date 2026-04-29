@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LOMS_Employee_Business\LOMS_Employee_Business.csproj" />
+    <ProjectReference Include="..\LOMS_Employee_DataAccess\LOMS_Employee_DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

@@ -37,7 +37,7 @@ jobs:
       - name: Restore, Build & Test
         env:
           # Injection de la chaîne de connexion pour que les tests trouvent la DB
-          ConnectionStrings__DefaultConnection: "Server=localhost;Database=master;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True"
+          ConnectionStrings__DefaultConnection: "Server=localhost;Database=LOMS_EmployeeDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True"
         run: |
           # 1. Localisation du projet API
           PROJ_FILE=$(find ./${{ matrix.service }} -name "*_API.csproj" | head -n 1)

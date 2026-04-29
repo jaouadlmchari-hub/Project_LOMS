@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36429.23 d17.14
+VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Auth_API", "LOMS_Auth_API.csproj", "{9C39EB39-7C50-4C40-BCB5-45650DEF344E}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Auth_DataAccess", "..\LOMS_Auth_DataAccess\LOMS_Auth_DataAccess.csproj", "{3A43D654-91EA-4CAA-8525-9061BA3EFCB0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Auth_Shared", "..\LOMS_Auth_Shared\LOMS_Auth_Shared.csproj", "{A11E026C-95A7-4A5D-B739-85AD9CEE13BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LOMS_Auth_Tests", "..\LOMS_Auth_Tests\LOMS_Auth_Tests.csproj", "{5D124F9E-AC6A-4D4B-A87C-E991C198C470}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{A11E026C-95A7-4A5D-B739-85AD9CEE13BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A11E026C-95A7-4A5D-B739-85AD9CEE13BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A11E026C-95A7-4A5D-B739-85AD9CEE13BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D124F9E-AC6A-4D4B-A87C-E991C198C470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D124F9E-AC6A-4D4B-A87C-E991C198C470}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D124F9E-AC6A-4D4B-A87C-E991C198C470}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D124F9E-AC6A-4D4B-A87C-E991C198C470}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
