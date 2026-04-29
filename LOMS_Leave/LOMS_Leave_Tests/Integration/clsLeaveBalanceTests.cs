@@ -3,7 +3,7 @@ using FluentAssertions;
 using LOMS_Leave_Buisness;
 using System.Data;
 
-namespace LOMS_Leave_Tests.Intergration
+namespace LOMS_Leave_Tests.Integration
 {
     public class clsLeaveBalanceTests
     {

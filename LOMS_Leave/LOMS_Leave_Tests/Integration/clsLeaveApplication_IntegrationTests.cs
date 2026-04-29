@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LOMS_Leave_Tests.Intergration
+namespace LOMS_Leave_Tests.Integration
 {
     public class clsLeaveApplication_IntegrationTests
     {
