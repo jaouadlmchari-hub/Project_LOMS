@@ -76,12 +76,17 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build & Push
-        uses: docker/build-push-action@v5
-        with:
-          context: ./${{ matrix.service }} 
-          # On cherche le Dockerfile à l'intérieur
-          file: ./${{ matrix.service }}/Dockerfile 
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: |
+          # Convertir le nom du service en minuscules (ex: LOMS_Salary -> loms_salary)
+          SERVICE_NAME_LOWER=$(echo "${{ matrix.service }}" | tr '[:upper:]' '[:lower:]')
+          
+          echo "Building image for: $SERVICE_NAME_LOWER"
+          
+          # Utiliser la commande docker build-push directe pour plus de contrôle sur le nom
+          docker buildx build \
+            --context ./${{ matrix.service }} \
+            --file ./${{ matrix.service }}/Dockerfile \
+            --push \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/$SERVICE_NAME_LOWER:latest \
+            --cache-from type=gha \
+            --cache-to type=gha,mode=max .
