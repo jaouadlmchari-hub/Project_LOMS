@@ -6,6 +6,12 @@ namespace LOMS_Employee_Tests.Integration
 {
     public class clsCountry_IntegrationTests
     {
+
+        public clsCountry_IntegrationTests()
+        {
+            TestDatabaseInitializer.Initialize();
+        }   
+
         [Fact]
         public void Find_ByID_ShouldReturnCountry_WhenIDExists()
         {

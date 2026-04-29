@@ -6,6 +6,12 @@ namespace LOMS_Employee_Tests.Integration
 {
     public class clsJob_IntegrationTests
     {
+
+        public clsJob_IntegrationTests()
+        {
+            TestDatabaseInitializer.Initialize();
+        }
+
         [Fact]
         public void Find_By_ID_Should_Return_Job_If_Exists()
         {

@@ -6,6 +6,12 @@ namespace LOMS_Employee_Tests.Integration
 {
     public class clsDepartment_IntegrationTests
     {
+
+        public clsDepartment_IntegrationTests()
+        {
+            TestDatabaseInitializer.Initialize();
+        }
+
         [Fact]
         public void Save_ShouldAddNewDepartment_And_Find_ShouldReturnIt()
         {
