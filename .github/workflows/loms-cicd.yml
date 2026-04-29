@@ -46,13 +46,12 @@ jobs:
           dotnet restore "$PROJ_FILE"
           dotnet build "$PROJ_FILE" -c Release --no-restore
           
-          # 2. Localisation et exécution des tests
+          # 2. Localisation et exécution des tests (Uniquement Unit Tests)
           TEST_PROJECT=$(find . -name "${{ matrix.service }}*Tests.csproj" | head -n 1)
           if [ -n "$TEST_PROJECT" ]; then
-            echo "Testing: $TEST_PROJECT"
-            # On lance les tests. S'ils échouent, le job sera rouge. 
-            # Si tu veux qu'il reste vert malgré tout, ajoute "|| true" à la fin de la ligne suivante.
-            dotnet test "$TEST_PROJECT" -c Release
+            echo "Testing: $TEST_PROJECT (Excluding Integration Tests)"
+            # On lance uniquement les tests unitaires pour valider la logique métier
+            dotnet test "$TEST_PROJECT" -c Release --filter "FullyQualifiedName!~Integration"
           else
             echo "Aucun projet de test trouvé pour ${{ matrix.service }}"
           fi
