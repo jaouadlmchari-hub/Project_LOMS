@@ -73,12 +73,13 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build & Push
+      - name: Build & Push
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./${{ matrix.service }}/Dockerfile
+          context: ./${{ matrix.service }} 
+          # On cherche le Dockerfile à l'intérieur
+          file: ./${{ matrix.service }}/Dockerfile 
           push: true
-          # On force le nom de l'image en minuscules pour Docker Hub
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ matrix.service }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
