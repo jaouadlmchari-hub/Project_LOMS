@@ -393,17 +393,17 @@ namespace LOMS_Auth_DataAccess
             return dto;
         }
 
-        public static UserDTO FindUserByUserNameAndPassword(string UserName , string PasswordHash)
+        public static UserDTO FindUserByUserNameAndPassword(string UserName , string Password)
         {
             UserDTO dto = null;
 
             using (SqlConnection connection = new SqlConnection(clsDataAccessSettings.ConnectionString))
             {
-                string query = "SELECT * FROM Users WHERE PasswordHash = @PasswordHash AND UserName = @UserName";
+                string query = "SELECT * FROM Users WHERE Password = @Password AND UserName = @UserName";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@PasswordHash", PasswordHash);
+                    command.Parameters.AddWithValue("@Password", Password);
                     command.Parameters.AddWithValue("@UserName", UserName);
 
                     try
@@ -417,7 +417,7 @@ namespace LOMS_Auth_DataAccess
                                 {
                                     UserID = (int)reader["UserID"],
                                     UserName = (string)reader["UserName"],
-                                    Password = (string)reader["PasswordHash"],
+                                    Password = (string)reader["Password"],
                                     EmployeeID = (int)reader["EmployeeID"],
                                     IsActive = (bool)reader["IsActive"],
                                     CreatedAt = (DateTime)reader["CreatedAt"]
