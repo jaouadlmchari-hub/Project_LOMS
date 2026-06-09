@@ -8,7 +8,7 @@ on:
 
 jobs:
   # ==========================================
-  # 1. JOB DÉDIÉ UNIQUEMENT AUX SERVICES BACKEND .NET
+  # 1. JOB BACKEND : UNIQUEMENT LES MICROSERVICES .NET
   # ==========================================
   build-and-test-backend:
     runs-on: ubuntu-latest
@@ -29,8 +29,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service:
-          [LOMS_Employee, LOMS_Auth, LOMS_Applications, LOMS_Leave, LOMS_Salary]
+        service: [
+            LOMS_Employee,
+            LOMS_Auth,
+            LOMS_Applications,
+            LOMS_Leave,
+            LOMS_Salary,
+          ] # On a ENLEVÉ LOMS_Web d'ici
 
     steps:
       - uses: actions/checkout@v4
@@ -39,19 +44,21 @@ jobs:
         env:
           ConnectionStrings__DefaultConnection: "Server=localhost;Database=LOMS_EmployeeDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True"
         run: |
+          echo "--- Démarrage du Build pour le Backend (.NET) ---"
           PROJ_FILE=$(find ./${{ matrix.service }} -name "*_API.csproj" | head -n 1)
           echo "Building: $PROJ_FILE"
+
           dotnet restore "$PROJ_FILE"
           dotnet build "$PROJ_FILE" -c Release --no-restore
 
           TEST_PROJECT=$(find . -name "${{ matrix.service }}*Tests.csproj" | head -n 1)
           if [ -n "$TEST_PROJECT" ]; then
-            echo "Testing: $TEST_PROJECT"
+            echo "Testing: $TEST_PROJECT (Excluding Integration Tests)"
             dotnet test "$TEST_PROJECT" -c Release --filter "FullyQualifiedName!~Integration"
           fi
 
   # ==========================================
-  # 2. JOB DÉDIÉ UNIQUEMENT AU FRONTEND REACT (LOMS_Web)
+  # 2. JOB FRONTEND : ISOLÉ POUR REACT & TAILWIND V4
   # ==========================================
   build-frontend:
     runs-on: ubuntu-latest
@@ -62,8 +69,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-          cache: "npm"
-          cache-dependency-path: LOMS_Web/package-lock.json
 
       - name: Install & Build Frontend
         run: |
@@ -80,15 +85,14 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service:
-          [
+        service: [
             LOMS_Employee,
             LOMS_Auth,
             LOMS_Applications,
             LOMS_Leave,
             LOMS_Salary,
             LOMS_Web,
-          ]
+          ] # Docker build a besoin de tous les services ici
     steps:
       - uses: actions/checkout@v4
 
