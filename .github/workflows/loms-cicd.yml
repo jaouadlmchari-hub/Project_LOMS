@@ -45,7 +45,7 @@ jobs:
       # --- ÉTAPE SPECIFIQUE POUR LOMS_Web : Setup Node.js v20 ---
       - name: Setup Node.js (Only for LOMS_Web)
         if: matrix.service == 'LOMS_Web'
-        uses: actions/actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
 
