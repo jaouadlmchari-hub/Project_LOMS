@@ -62,7 +62,7 @@ jobs:
       - name: Install & Build Frontend
         run: |
           cd LOMS_Web
-          npm json || npm install
+          npm install
           npm run build
 
   # 3. JOB DE DÉPLOIEMENT GLOBAL (DOCKER HUB)
