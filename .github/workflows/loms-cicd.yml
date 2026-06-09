@@ -2,14 +2,14 @@ name: LOMS CI/CD Ultra-Optimized
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    
+
     # Configuration du service SQL Server pour les tests d'intégration
     services:
       sqlserver:
@@ -29,31 +29,54 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [LOMS_Employee, LOMS_Auth, LOMS_Applications, LOMS_Leave, LOMS_Salary, LOMS_Web]
+        service:
+          [
+            LOMS_Employee,
+            LOMS_Auth,
+            LOMS_Applications,
+            LOMS_Leave,
+            LOMS_Salary,
+            LOMS_Web,
+          ]
 
     steps:
       - uses: actions/checkout@v4
 
+      # --- ÉTAPE SPECIFIQUE POUR LOMS_Web : Setup Node.js v20 ---
+      - name: Setup Node.js (Only for LOMS_Web)
+        if: matrix.service == 'LOMS_Web'
+        uses: actions/actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # --- EXÉCUTION DU BUILD & TEST ---
       - name: Restore, Build & Test
         env:
           # Injection de la chaîne de connexion pour que les tests trouvent la DB
           ConnectionStrings__DefaultConnection: "Server=localhost;Database=LOMS_EmployeeDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True"
         run: |
-          # 1. Localisation du projet API
-          PROJ_FILE=$(find ./${{ matrix.service }} -name "*_API.csproj" | head -n 1)
-          echo "Building: $PROJ_FILE"
-          
-          dotnet restore "$PROJ_FILE"
-          dotnet build "$PROJ_FILE" -c Release --no-restore
-          
-          # 2. Localisation et exécution des tests (Uniquement Unit Tests)
-          TEST_PROJECT=$(find . -name "${{ matrix.service }}*Tests.csproj" | head -n 1)
-          if [ -n "$TEST_PROJECT" ]; then
-            echo "Testing: $TEST_PROJECT (Excluding Integration Tests)"
-            # On lance uniquement les tests unitaires pour valider la logique métier
-            dotnet test "$TEST_PROJECT" -c Release --filter "FullyQualifiedName!~Integration"
+          if [ "${{ matrix.service }}" = "LOMS_Web" ]; then
+            echo "--- Démarrage du Build pour le Frontend (Node.js/Vite) ---"
+            cd LOMS_Web
+            npm install
+            npm run build
           else
-            echo "Aucun projet de test trouvé pour ${{ matrix.service }}"
+            echo "--- Démarrage du Build pour le Backend (.NET) ---"
+            # 1. Localisation du projet API
+            PROJ_FILE=$(find ./${{ matrix.service }} -name "*_API.csproj" | head -n 1)
+            echo "Building: $PROJ_FILE"
+            
+            dotnet restore "$PROJ_FILE"
+            dotnet build "$PROJ_FILE" -c Release --no-restore
+            
+            # 2. Localisation et exécution des tests (Uniquement Unit Tests)
+            TEST_PROJECT=$(find . -name "${{ matrix.service }}*Tests.csproj" | head -n 1)
+            if [ -n "$TEST_PROJECT" ]; then
+              echo "Testing: $TEST_PROJECT (Excluding Integration Tests)"
+              dotnet test "$TEST_PROJECT" -c Release --filter "FullyQualifiedName!~Integration"
+            else
+              echo "Aucun projet de test trouvé pour ${{ matrix.service }}"
+            fi
           fi
 
   deploy:
@@ -62,7 +85,15 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [LOMS_Employee, LOMS_Auth, LOMS_Applications, LOMS_Leave, LOMS_Salary, LOMS_Web]
+        service:
+          [
+            LOMS_Employee,
+            LOMS_Auth,
+            LOMS_Applications,
+            LOMS_Leave,
+            LOMS_Salary,
+            LOMS_Web,
+          ]
     steps:
       - uses: actions/checkout@v4
 
@@ -71,7 +102,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -82,10 +113,8 @@ jobs:
       - name: Build & Push
         uses: docker/build-push-action@v5
         with:
-          # On change le contexte pour la RACINE du projet (.)
-          context: . 
-          # Mais on pointe bien vers le Dockerfile du service spécifique
-          file: ./${{ matrix.service }}/Dockerfile 
+          context: .
+          file: ./${{ matrix.service }}/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.service_name.outputs.lower }}:latest
           cache-from: type=gha
