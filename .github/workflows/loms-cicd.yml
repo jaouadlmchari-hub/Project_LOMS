@@ -7,11 +7,10 @@ on:
     branches: [main]
 
 jobs:
-  # ==========================================
-  # 1. JOB BACKEND : UNIQUEMENT LES MICROSERVICES .NET
-  # ==========================================
-  build-and-test-backend:
+  build-and-test:
     runs-on: ubuntu-latest
+
+    # Configuration du service SQL Server pour les tests d'intégration
     services:
       sqlserver:
         image: mcr.microsoft.com/mssql/server:2022-latest
@@ -20,79 +19,79 @@ jobs:
           MSSQL_SA_PASSWORD: "JJ.1213famass"
         ports:
           - 1433:1433
+        # On attend que SQL Server soit réellement prêt à répondre
         options: >-
           --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'JJ.1213famass' -C -Q 'SELECT 1'"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 10
-
     strategy:
       fail-fast: false
       matrix:
-        service: [
-            LOMS_Employee,
-            LOMS_Auth,
-            LOMS_Applications,
-            LOMS_Leave,
-            LOMS_Salary,
-          ] # On a ENLEVÉ LOMS_Web d'ici
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Restore, Build & Test (.NET)
-        env:
-          ConnectionStrings__DefaultConnection: "Server=localhost;Database=LOMS_EmployeeDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True"
-        run: |
-          echo "--- Démarrage du Build pour le Backend (.NET) ---"
-          PROJ_FILE=$(find ./${{ matrix.service }} -name "*_API.csproj" | head -n 1)
-          echo "Building: $PROJ_FILE"
-
-          dotnet restore "$PROJ_FILE"
-          dotnet build "$PROJ_FILE" -c Release --no-restore
-
-          TEST_PROJECT=$(find . -name "${{ matrix.service }}*Tests.csproj" | head -n 1)
-          if [ -n "$TEST_PROJECT" ]; then
-            echo "Testing: $TEST_PROJECT (Excluding Integration Tests)"
-            dotnet test "$TEST_PROJECT" -c Release --filter "FullyQualifiedName!~Integration"
-          fi
-
-  # ==========================================
-  # 2. JOB FRONTEND : ISOLÉ POUR REACT & TAILWIND V4
-  # ==========================================
-  build-frontend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Install & Build Frontend
-        run: |
-          cd LOMS_Web
-          npm install
-          npm run build
-
-  # ==========================================
-  # 3. JOB DE DÉPLOIEMENT GLOBAL (DOCKER HUB)
-  # ==========================================
-  deploy:
-    needs: [build-and-test-backend, build-frontend]
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        service: [
+        service:
+          [
             LOMS_Employee,
             LOMS_Auth,
             LOMS_Applications,
             LOMS_Leave,
             LOMS_Salary,
             LOMS_Web,
-          ] # Docker build a besoin de tous les services ici
+          ]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- ÉTAPE SPECIFIQUE POUR LOMS_Web : Setup Node.js v20 ---
+      - name: Setup Node.js (Only for LOMS_Web)
+        if: matrix.service == 'LOMS_Web'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # --- EXÉCUTION DU BUILD & TEST ---
+      - name: Restore, Build & Test
+        env:
+          # Injection de la chaîne de connexion pour que les tests trouvent la DB
+          ConnectionStrings__DefaultConnection: "Server=localhost;Database=LOMS_EmployeeDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True"
+        run: |
+          if [ "${{ matrix.service }}" = "LOMS_Web" ]; then
+            echo "--- Démarrage du Build pour le Frontend (Node.js/Vite) ---"
+            cd LOMS_Web
+            npm install
+            npm run build
+          else
+            echo "--- Démarrage du Build pour le Backend (.NET) ---"
+            # 1. Localisation du projet API
+            PROJ_FILE=$(find ./${{ matrix.service }} -name "*_API.csproj" | head -n 1)
+            echo "Building: $PROJ_FILE"
+            
+            dotnet restore "$PROJ_FILE"
+            dotnet build "$PROJ_FILE" -c Release --no-restore
+            
+            # 2. Localisation et exécution des tests (Uniquement Unit Tests)
+            TEST_PROJECT=$(find . -name "${{ matrix.service }}*Tests.csproj" | head -n 1)
+            if [ -n "$TEST_PROJECT" ]; then
+              echo "Testing: $TEST_PROJECT (Excluding Integration Tests)"
+              dotnet test "$TEST_PROJECT" -c Release --filter "FullyQualifiedName!~Integration"
+            else
+              echo "Aucun projet de test trouvé pour ${{ matrix.service }}"
+            fi
+          fi
+  deploy:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          [
+            LOMS_Employee,
+            LOMS_Auth,
+            LOMS_Applications,
+            LOMS_Leave,
+            LOMS_Salary,
+            LOMS_Web,
+          ]
     steps:
       - uses: actions/checkout@v4
 
