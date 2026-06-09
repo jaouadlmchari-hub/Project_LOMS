@@ -2,9 +2,14 @@
 FROM node:20-alpine AS build
 
 WORKDIR /app
-COPY package*.json ./
+
+# On cible explicitement le dossier LOMS_Web depuis la racine du projet
+COPY LOMS_Web/package*.json ./
 RUN npm install
-COPY . .
+
+# On copie tout le contenu du dossier de l'application web
+COPY LOMS_Web/ . 
+
 RUN npm run build
 
 # Étape 2 : Nginx pour servir l'app

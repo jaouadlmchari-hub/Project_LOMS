@@ -1,26 +1,33 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { employeeService } from '../../services/employeeService';
-import { FaEdit, FaTrash, FaEye, FaPlus, FaEnvelope, FaPhone, FaSync, FaSearch } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus, FaSync, FaSearch, FaEye, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 const EmployeeList = ({ onEdit, onViewDetails, onAdd }) => {
     const [employees, setEmployees] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
+    const [loading, setLoading] = useState(false);
+    
+    // État pour le menu contextuel
     const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, emp: null });
-    const menuRef = useRef(null);
 
     useEffect(() => {
         loadEmployees();
-        const handleClickOutside = () => setContextMenu({ ...contextMenu, visible: false });
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
+        
+        // Fermer le menu si on clique ailleurs
+        const handleClick = () => setContextMenu({ ...contextMenu, visible: false });
+        document.addEventListener('click', handleClick);
+        return () => document.removeEventListener('click', handleClick);
     }, []);
 
     const loadEmployees = async () => {
+        setLoading(true);
         try {
             const data = await employeeService.getAll();
             setEmployees(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Erreur chargement employés", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -34,6 +41,7 @@ const EmployeeList = ({ onEdit, onViewDetails, onAdd }) => {
         }
     };
 
+    // Gestion du clic droit
     const handleRightClick = (e, emp) => {
         e.preventDefault();
         setContextMenu({
@@ -44,28 +52,36 @@ const EmployeeList = ({ onEdit, onViewDetails, onAdd }) => {
         });
     };
 
-    const handleAction = (action) => {
+    // Action du menu contextuel
+    const handleMenuAction = (action) => {
         const emp = contextMenu.emp;
         setContextMenu({ ...contextMenu, visible: false });
 
         switch (action) {
-            case 'details': onViewDetails(emp.EmployeeID); break;
-            case 'edit': onEdit(emp); break;
-            case 'add': onAdd(); break;
-            case 'delete': 
-                if(window.confirm(`Supprimer ${emp.FirstName} ?`)) {
+            case 'details':
+                if (onViewDetails) onViewDetails(emp.EmployeeID);
+                break;
+            case 'edit':
+                onEdit(emp);
+                break;
+            case 'add':
+                onAdd();
+                break;
+            case 'delete':
+                if (window.confirm(`Supprimer ${emp.FullName} ?`)) {
                     employeeService.delete(emp.EmployeeID).then(loadEmployees);
                 }
                 break;
             case 'email':
-                if(emp.Email) window.location.href = `mailto:${emp.Email}?subject=Regarding your employment`;
+                if (emp.Email) window.location.href = `mailto:${emp.Email}`;
                 else alert("Pas d'email enregistré.");
                 break;
             case 'call':
-                if(emp.Phone) window.location.href = `tel:${emp.Phone}`;
+                if (emp.Phone) window.location.href = `tel:${emp.Phone}`;
                 else alert("Pas de téléphone enregistré.");
                 break;
-            default: break;
+            default:
+                break;
         }
     };
 
@@ -112,57 +128,74 @@ const EmployeeList = ({ onEdit, onViewDetails, onAdd }) => {
                         </tr>
                     </thead>
                     <tbody className="text-gray-600 text-sm font-light">
-                        {employees.map(emp => (
-                            <tr key={emp.EmployeeID} onContextMenu={(e) => handleRightClick(e, emp)} className="border-b border-gray-200 hover:bg-gray-50">
-                                <td className="py-3 px-6">{emp.EmployeeID}</td>
-                                <td className="py-3 px-6 font-medium">{emp.FullName} </td>
-                                <td className="py-3 px-6">{emp.NationalNo}</td>
-                                <td className="py-3 px-6">{emp.DepartmentName || 'N/A'}</td>
-                                <td className="py-3 px-6 text-center">
-                                    <span className={`px-3 py-1 rounded-full text-xs ${emp.IsActive ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
-                                        {emp.IsActive ? 'Actif' : 'Inactif'}
-                                    </span>
-                                </td>
-                                <td className="py-3 px-6 text-center">
-                                    <div className="flex item-center justify-center gap-2">
-                                        <button onClick={() => onEdit(emp)} className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center">
-                                            <FaEdit />
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
+                        {loading ? (
+                            <tr><td colSpan="6" className="py-4 text-center">Chargement...</td></tr>
+                        ) : employees.length === 0 ? (
+                            <tr><td colSpan="6" className="py-4 text-center text-gray-500">Aucun employé trouvé.</td></tr>
+                        ) : (
+                            employees.map(emp => (
+                                <tr 
+                                    key={emp.EmployeeID} 
+                                    onContextMenu={(e) => handleRightClick(e, emp)} 
+                                    className="border-b border-gray-200 hover:bg-gray-50"
+                                >
+                                    <td className="py-3 px-6">{emp.EmployeeID}</td>
+                                    
+                                    {/* CORRECTION ICI : Utilisation de FullName au lieu de FirstName + LastName */}
+                                    <td className="py-3 px-6 font-medium text-gray-900">
+                                        {emp.FullName}
+                                    </td>
+                                    
+                                    <td className="py-3 px-6">{emp.NationalNo}</td>
+                                    <td className="py-3 px-6">{emp.DepartmentName || 'N/A'}</td>
+                                    
+                                    {/* CORRECTION ICI : Utilisation de Status (string) au lieu de IsActive (bool) */}
+                                    <td className="py-3 px-6 text-center">
+                                        <span className={`px-3 py-1 rounded-full text-xs font-bold ${emp.Status === 'Active' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
+                                            {emp.Status === 'Active' ? 'Actif' : 'Inactif'}
+                                        </span>
+                                    </td>
+                                    
+                                    <td className="py-3 px-6 text-center">
+                                        <div className="flex item-center justify-center gap-2">
+                                            <button onClick={() => onEdit(emp)} className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 flex items-center justify-center">
+                                                <FaEdit />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
 
-            {/* Context Menu Customisé */}
+            {/* Context Menu */}
             {contextMenu.visible && (
                 <div 
-                    ref={menuRef}
-                    className="position-fixed shadow-lg rounded bg-white py-2"
-                    style={{ top: contextMenu.y, left: contextMenu.x, zIndex: 1050, minWidth: '200px' }}
+                    className="fixed bg-white shadow-lg rounded-lg py-2 z-50 border border-gray-200 min-w-[200px]"
+                    style={{ top: contextMenu.y, left: contextMenu.x }}
                     onClick={(e) => e.stopPropagation()}
                 >
-                    <div className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center" onClick={() => handleAction('details')}>
-                        <FaEye className="text-blue-500 mr-2" /> Show Details
+                    <div onClick={() => handleMenuAction('details')} className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                        <FaEye className="text-blue-500" /> Show Details
                     </div>
                     <hr className="my-1 border-gray-200" />
-                    <div className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center" onClick={() => handleAction('add')}>
-                        <FaPlus className="text-green-500 mr-2" /> Add New Employee
+                    <div onClick={() => handleMenuAction('add')} className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                        <FaPlus className="text-green-500" /> Add New Employee
                     </div>
-                    <div className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center" onClick={() => handleAction('edit')}>
-                        <FaEdit className="text-yellow-500 mr-2" /> Edit
+                    <div onClick={() => handleMenuAction('edit')} className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                        <FaEdit className="text-yellow-500" /> Edit
                     </div>
-                    <div className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center text-red-600" onClick={() => handleAction('delete')}>
-                        <FaTrash className="mr-2" /> Delete
+                    <div onClick={() => handleMenuAction('delete')} className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2 text-red-600">
+                        <FaTrash /> Delete
                     </div>
                     <hr className="my-1 border-gray-200" />
-                    <div className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center" onClick={() => handleAction('email')}>
-                        <FaEnvelope className="text-blue-400 mr-2" /> Send Email
+                    <div onClick={() => handleMenuAction('email')} className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                        <FaEnvelope className="text-blue-400" /> Send Email
                     </div>
-                    <div className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center" onClick={() => handleAction('call')}>
-                        <FaPhone className="text-green-500 mr-2" /> Phone Call
+                    <div onClick={() => handleMenuAction('call')} className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                        <FaPhone className="text-green-500" /> Phone Call
                     </div>
                 </div>
             )}

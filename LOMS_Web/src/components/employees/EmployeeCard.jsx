@@ -4,15 +4,20 @@ import { FaUser, FaBriefcase, FaMapMarkerAlt, FaEnvelope, FaPhone } from 'react-
 const EmployeeCard = ({ employee, onClose }) => {
     if (!employee) return null;
 
+const defaultImage = employee.Gender === 'Male' 
+        ? 'https://via.placeholder.com/150/0000FF/808080?Text=Homme' 
+        : 'https://via.placeholder.com/150/FF0000/FFFFFF?Text=Femme';
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
             <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 overflow-hidden">
                 <div className="bg-dark-blue bg-blue-900 text-white p-6 flex justify-between items-start">
                     <div className="flex items-center gap-6">
                         <img 
-                            src={employee.ImagePath || (employee.Gender === 0 ? '/male-placeholder.png' : '/female-placeholder.png')} 
+                            src={employee.ImagePath || defaultImage} 
                             alt="Profile" 
                             className="w-24 h-24 rounded-full border-4 border-white object-cover"
+                            onError={(e) => { e.target.src = defaultImage; }} // Fallback si l'image charge mal
                         />
                         <div>
                             <h2 className="text-2xl font-bold">{employee.FirstName} {employee.LastName}</h2>

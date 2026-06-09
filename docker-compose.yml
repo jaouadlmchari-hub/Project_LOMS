@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   # --- Infrastructure Kafka ---
   zookeeper:
@@ -31,15 +33,13 @@ services:
     networks:
       - loms-network
 
-  # --- Service Employee (Port 7175) ---
+  # --- Service Employee ---
   employee-service:
     container_name: employee-container
     image: loms-employee-service
     build:
       context: .
       dockerfile: LOMS_Employee/Dockerfile
-    #ports:
-    # - "7175:8080"
     environment:
       - ConnectionStrings__EmployeeDbConnection=Server=host.docker.internal;Database=LOMS_EmployeeDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
     networks:
@@ -47,15 +47,13 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  # --- Service Auth (Port 7176) ---
+  # --- Service Auth ---
   auth-service:
     container_name: auth-container
     image: loms-auth-service
     build:
       context: .
       dockerfile: LOMS_Auth/Dockerfile
-    #ports:
-    # - "7176:8081"
     environment:
       - ConnectionStrings__AuthDbConnection=Server=host.docker.internal;Database=LOMS_AuthDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
       - ExternalServices__EmployeeApiUrl=http://employee-container:8080
@@ -66,15 +64,13 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  # --- Service Applications (Port 7177) ---
+  # --- Service Applications ---
   applications-service:
     container_name: applications-container
     image: loms-applications-service
     build:
       context: .
       dockerfile: LOMS_Applications/Dockerfile
-    #ports:
-    #- "7177:8082"
     environment:
       - ConnectionStrings__ApplicationDbConnection=Server=host.docker.internal;Database=LOMS_ApplicationDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
       - EMPLOYEE_API_URL=http://employee-container:8080/
@@ -88,15 +84,13 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-  # --- Service Leave (Port 7178) ---
+  # --- Service Leave ---
   leave-service:
     container_name: leave-container
     image: loms-leave-service
     build:
       context: .
       dockerfile: LOMS_Leave/Dockerfile
-    #ports:
-    # - "7178:8083"
     environment:
       - ConnectionStrings__LeaveApplicationDbConnection=Server=host.docker.internal;Database=LOMS_LeaveDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
       - Kafka__BootstrapServers=kafka-container:9092
@@ -108,15 +102,13 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-   # --- Service Salaries (Port 7179) ---
+   # --- Service Salaries ---
   salary-service:
     container_name: salaries-container
     image: loms-salaries-service
     build:
       context: .
       dockerfile: LOMS_Salary/Dockerfile
-    #ports:
-    #- "7179:8084"
     environment:
       - ConnectionStrings__EmployeeSalaryDbConnection=Server=host.docker.internal;Database=LOMS_SalaryDB;User Id=sa;Password=JJ.1213famass;TrustServerCertificate=True;
     networks:
@@ -124,34 +116,23 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-
- 
-  # --- NOUVEAU : API GATEWAY (NGINX) ---
+  # --- API GATEWAY (NGINX) ---
   api-gateway:
     image: nginx:stable-alpine
     container_name: loms-api-gateway
     ports:
-      - "8080:80"  # Le frontend et Postman appelleront http://localhost:8080
+      - "8080:80" 
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro  # Montage de la config
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - employee-service
       - auth-service
+      # Note: On retire la dépendance au web-client car il n'existe plus dans ce compose
     networks:
       - loms-network
-
-        # --- Service Web Client (React) ---
-  web-client:
-    container_name: loms-web-container
-    build:
-      context: ./LOMS_Web
-      dockerfile: Dockerfile
-    expose:
-      - "80"  # Expose le port 80 UNIQUEMENT au réseau interne Docker
-    depends_on:
-      - api-gateway  # Le site web dépend du gateway étant prêt
-    networks:
-      - loms-network
+    # Important pour que Nginx puisse résoudre host.docker.internal sur certains systèmes Linux
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 networks:
   loms-network:
