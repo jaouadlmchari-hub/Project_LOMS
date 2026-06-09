@@ -2,7 +2,7 @@ name: LOMS CI/CD Ultra-Optimized
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/loms-web-major-refactor]
   pull_request:
     branches: [main]
 
