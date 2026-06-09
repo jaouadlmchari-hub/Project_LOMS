@@ -5,7 +5,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    host: true, // Crucial pour l'accès Docker
-    port: 5174, // Doit correspondre à la configuration de ta passerelle Nginx
+    host: true,
+    port: 5174,
   },
 });
